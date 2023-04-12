@@ -1,0 +1,71 @@
+\ProvidesPackage{F-Define}
+
+\RequirePackage[]{graphicx}     % 图形库
+\RequirePackage[]{booktabs}
+\RequirePackage[]{geometry}     % 用于定义文档的页边距
+\RequirePackage[]{amssymb}      % 数学符号包
+\RequirePackage[]{amsmath}      % 数学符号表
+\RequirePackage[]{amsthm}       % 数学定理证明环境
+\RequirePackage{listings}
+\RequirePackage{color}
+\RequirePackage{gbt7714}
+% \RequirePackage{subcaption}
+\RequirePackage{fancyhdr}
+
+\geometry{a4paper,left=1.25in,right=1.25in,top=1in,bottom=1in}      % 定义页边距
+\bibliographystyle{gbt7714-numerical}   % 定义参考文献的引用格式
+\pagestyle{plain}       % 定义页眉页脚格式——没有页眉，页脚中部放置页码。
+
+% ==================== 定义“例题”环境 ====================
+\newcounter{questionCounter}
+\newenvironment{question}
+    {
+        \kaishu
+        \stepcounter{questionCounter}
+        {\heiti 例题} \thequestionCounter　
+    }
+    {}
+
+\newenvironment{question*}
+    {
+        \kaishu
+        {\heiti 例题}
+    }
+    {}
+
+% % ==================== 定义“算法描述”环境 ====================
+% \newcounter{describeArithmetic}
+% \newenvironment{arithmetic}{
+%         \fbox
+
+%         \stepcounter{describeArithmetic}
+%         {\heiti 算法描述} \thedescribeArithmetic
+
+%         \begin{minipage}[h]{30em} 
+%         \centering
+%         \kaishu
+%     }{
+%         \end{minipage}
+%     }
+
+
+% ==================== 定义“代码”环境 ====================
+\lstset{
+    basicstyle          =   \ttfamily,          % 基本代码风格
+    keywordstyle        =   \bfseries,          % 关键字风格
+    commentstyle        =   \rmfamily\itshape,  % 注释的风格，斜体
+    stringstyle         =   \ttfamily,  % 字符串风格
+    flexiblecolumns,                % 别问为什么，加上这个
+    numbers             =   left,   % 行号的位置在左边
+    showspaces          =   false,  % 是否显示空格，显示了有点乱，所以不现实了
+    numberstyle         =   \zihao{-4}\ttfamily,    % 行号的样式，小五号，tt等宽字体
+    showstringspaces    =   false,
+    captionpos          =   t,      % 这段代码的名字所呈现的位置，t指的是top上面
+    frame               =   lrtb,   % 显示边框
+    breaklines          =   true    % 自动换行
+    }
+
+    
+% ==================== 定义“定理”环境 ====================
+
+\newtheorem{theorem}{定理}[section]
