@@ -152,23 +152,44 @@ V_{\max2} = \sum _{k = i} ^{30} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i}
 M_{in}(i, j, t) = 
 	\begin{cases}
 	\min \left\{
-	 	V - \left[ \sum _{k = i} ^{30} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
-	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
+	 	V - F(30), \quad
+	  	Q, \quad
 	  	\sum _{k = i} ^{30} M_f(i, k)
-	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) < N_l \mod (N_l + N_s), t = 1 \\
+	\right\} \cdot \alpha(i, j) &  IF_1\\
 	\min \left\{
-	 	V - \left[ \sum _{k = i} ^{30} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
-	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
-	  	\sum _{k = i} ^{30} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{30} M_{in}(i, l, k)
-	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) < N_l \mod (N_l + N_s), t > 1 \\
+	 	V - F(30), \quad
+	  	Q, \quad
+        G(30)
+	\right\} \cdot \alpha(i, j) &  IF_2\\
 	\min \left\{
-	 	V - \left[ \sum _{k = i} ^{e} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
-	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
-	  	\sum _{k = i} ^{e} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{e} M_{in}(i, l, k)
-	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) \geq N_l \mod (N_l + N_s), s \leq i, j \leq e \\
-	0 & \text{ otherwise } 
+	 	V - F(e), \quad
+	  	Q, \quad
+        G(e)
+	\right\} \cdot \alpha(i, j) &  IF_3\\
+	0 & \text{ ow } 
 	\end{cases}
 \end{equation}
+
+其中，$FI_i(i=1,2,3)$分别代表：
+
+\begin{equation*}
+    \begin{cases}
+        FI_1 = \text{if}(t-1)<N_l\mod(N_l+N_s), t = 1  \\
+        FI_2 = \text{ if } (t - 1) < N_l \mod (N_l + N_s), t > 1    \\
+        FI_3 = \text{ if } (t - 1) \geq N_l \mod (N_l + N_s), s \leq i, j \leq e \\
+    \end{cases}
+\end{equation*}
+
+$F(x)$、$G(x)$、$Q$代表：
+
+\begin{equation*}
+    \begin{cases}
+        F(x) = \sum _{k = i} ^{x} M_{cur}(i, k, t) - M_{out}(i, t)  \\
+        G(x) = \sum _{k = i} ^{30} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{30} M_{in}(i, l, k)   \\
+        Q = \frac {t_{max}} {t_{avg}} - M_{out}(i, t)   \\
+    \end{cases}
+\end{equation*}
+
 
 第一个开行的车一定不是小交，因此暂时不用考虑追踪时间。而由定义得，第一个车从起点开始行驶的时刻为：乘客上下车完成后。而由于实际的上下车的数据均已知，因此可以利用平均一人上下车时间得到该车出发的时间。而对于下一个站的出发时间，只要用当前站的时刻，加上到下一站的耗时，再加上下一站的乘客上下车时间即可。
 
@@ -179,22 +200,37 @@ M_{in}(i, j, t) =
 \begin{equation}
 M_{tm}(i, t) = 
 	\begin{cases}
-		t_{avg} \cdot \sum _{k = i} ^{30} M_{in}(i, k, t) & \text{ if } i = t = 1 \\
-		M_{tm}(i - 1, t) + t_{i - 1} + t_{avg} \cdot \left[
-			M_{out}(i, t) + \sum _{k = i} ^{30} M_{in}(i, k, t)
-		\right] & \text{ if } i > 1, t = 1\\
+		t_{avg} \cdot \sum _{k = i} ^{30} M_{in}(i, k, t) &  FI_1\\
+		H & FI_2\\
 		\max \left\{ 
-			M_{tm}(i - 1, t) + t_{i - 1} + t_{avg} \cdot \left[
-				M_{out}(i, t) + \sum _{k = i} ^{30} M_{in}(i, k, t)
-			\right], 
+			H, \quad
 			\max _{k = 1} ^{t - 1}M_{tm}(i, k) + t_{del}
-		\right\} & \text{ if }\begin{matrix}
- 			t > 1, (t - 1) < N_l \mod (N_l + N_s),  \\
-			\text{ or } s \leq i \leq e, t > 1, (t - 1) \geq N_l \mod (N_l + N_s)\\
-		\end{matrix} \\
-		0 & \text{ otherwise }
+		\right\} & FI_3\\
+		 \\
+		0 & \text{ ow }
 	\end{cases}
 \end{equation}
+
+其中，$FI_i(i=1,2,3)$分别代表：
+
+\begin{equation*}
+    \begin{cases}
+        FI_1 = \text{ if } i = t = 1   \\
+        FI_2 = \text{ if } i > 1, t = 1    \\
+        FI_3 = \text{ if }\begin{matrix}
+            t > 1, (t - 1) < N_l \mod (N_l + N_s),  \\
+            \text{ or } s \leq i \leq e, t > 1, (t - 1) \geq N_l \mod (N_l + N_s)
+            \end{matrix}
+    \end{cases}
+\end{equation*}
+
+$H$代表：
+
+\begin{equation*}
+    H = M_{tm}(i - 1, t) + t_{i - 1} + t_{avg} \cdot \left[
+			M_{out}(i, t) + \sum _{k = i} ^{30} M_{in}(i, k, t)
+		\right]
+\end{equation*}
 
 由于$M_{tm}$的意义为列车刚离开的时间，也就是列车乘客刚上下车结束后的时间，因此最长的那个是最后一个完成任务的，于是最后完成的时间即为答案。
 
@@ -203,9 +239,40 @@ t_{total} = \max _{i, t} \{M_{tm}(i, t)\}
 \end{equation}
 
 
-\subsubsection{遗传算法搜寻帕累托最优解}
+\subsubsection{遗传算法解双目标规划模型}
 
-是
+\paragraph{双目标规划模型}
+
+企业运营的成本可以分为两类，分别运营固定成本与变动成本。其中运营的固定成本为列车的采购数量，而变动成本为列车的运行总里程。于是，可以建立双目标规划模型\cite{caoJiyuchengkedengdaishijiandechengshiguidaojiaotongliecheshikebiaoyouhuamoxingyusuanfayanjiu2021}：
+
+\begin{equation}
+    \min Z = \min z_1 + \min z_2
+\end{equation}
+
+根据最短理想点法，存在评价函数：
+
+\begin{align}
+    U = (z_1, \cdots, z_m) = \sqrt{\sum_{j=1}^m(z_j-z_j^{\min})^2}  \\
+    U^{'} = (z_1, \cdots, z_m) = \sqrt{
+        \sum_{j=1}^m (
+                \frac{z_j-z_j^{\min}}{z_j^{\min}}
+            )^2
+        }   \\
+\end{align}
+
+故有：
+
+\begin{equation}
+    Z = U_{'}=(z_1,\cdots,z_m)
+\end{equation}
+
+\paragraph{遗传算法流程}
+
+根据前文的分析，下面依次给出再该问题中，遗传算法的三要素的具体值：
+
+\begin{enumerate}
+    \item 
+\end{enumerate}
 
 
 % ............ 模型的准备 ............ %
@@ -274,3 +341,26 @@ t_{total} = \max _{i, t} \{M_{tm}(i, t)\}
 
 \section{模型的评价与改进}
 
+\subsection{模型的优点}
+
+\begin{enumerate}
+    \item 该模型充分考虑乘客在现实中的情况，各种类型的乘客随机上车，每个车站的乘客类型的分布不同；
+    \item 该模型考虑了各个列车行驶的路径，并且能够自动调整列车的冲突，使之安全运行；
+    \item 该模型通过优化算法极大的降低了时间复杂度，提高了求解答案所需要的时间。
+\end{enumerate}
+
+\subsection{模型的缺点}
+
+\begin{enumerate}
+    \item 该模型只考虑了某个时间上的状态，对于其他时候的安排需要另行设计；
+    \item 该模型只能求得近似最优解，甚至再某些情况下，只能求出局部最优近似解，而没有全局最优解；
+    \item 该模型难以适应突发状况，一旦有列车的晚点，整个结论就必须要重新计算。
+\end{enumerate}
+
+\subsection{模型的推广}
+
+\begin{enumerate}
+    \item 该模型中应用了遗传算法。遗传算法可以用来解决NP类问题，利用概率从一个超大集合中搜寻到某个满足条件的解。该算法应用场景广泛，譬如再商旅路径问题中也有应用；
+    \item 该模型中使用提出了一种列车客运模型，可以用来描述列车的运动状态，使用该模型，可以充分考虑各个列车之间的间隔对列车行驶带来的影响。
+    \item 该模型中设计了一套算法用来模拟列车的运行状态，以求出列车的时刻表。计算机的模拟可以用来解决很多复杂的现实，再一定情况下，适当使用计算机模拟是一种很好的方法。
+\end{enumerate}
