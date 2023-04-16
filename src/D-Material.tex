@@ -23,4 +23,39 @@
 
 \section{程序代码}
 
-下面是程序
+\begin{lstlisting}[caption={类的定义语句}]
+    class Train:
+        def __init__(self, departure_time, type):
+            self.type = type
+            self.passengers_num = 0
+            self.passengers = [0] * 30
+            self.arrive_time = [0]
+            self.depart_time = []
+            self.trans_passengers_num = 0
+            self.arrive_time.append(departure_time)
+    
+    class Station:
+        def __init__(self, id, passengers_od, next_station_time, next_station_distance):
+            self.id = id
+            self.passenger_traffic = 0
+            self.passengers_od = passengers_od
+            self.passengers = 0
+            self.next_station_time = next_station_time
+            self.next_station_distance = next_station_distance
+    
+    class Simulator:
+        def __init__(self, interval, scale, mini_start, mini_end):
+            self.mini_start = mini_start
+            self.mini_end = mini_end
+            self.interval = interval
+            self.scale = scale
+            self.train_max_capacity = 1860
+            self.safe_time_interval = 108
+            self.clock = 0
+            self.train_departure_num = 0
+            self.train_last_departure = 0
+            self.trains = []
+            self.stations = []
+            self.stations_init()
+    
+    \end{lstlisting}
