@@ -152,23 +152,44 @@ V_{\max2} = \sum _{k = i} ^{30} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i}
 M_{in}(i, j, t) = 
 	\begin{cases}
 	\min \left\{
-	 	V - \left[ \sum _{k = i} ^{30} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
-	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
+	 	V - F(30), \quad
+	  	Q, \quad
 	  	\sum _{k = i} ^{30} M_f(i, k)
-	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) < N_l \mod (N_l + N_s), t = 1 \\
+	\right\} \cdot \alpha(i, j) &  IF_1\\
 	\min \left\{
-	 	V - \left[ \sum _{k = i} ^{30} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
-	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
-	  	\sum _{k = i} ^{30} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{30} M_{in}(i, l, k)
-	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) < N_l \mod (N_l + N_s), t > 1 \\
+	 	V - F(30), \quad
+	  	Q, \quad
+        G(30)
+	\right\} \cdot \alpha(i, j) &  IF_2\\
 	\min \left\{
-	 	V - \left[ \sum _{k = i} ^{e} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
-	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
-	  	\sum _{k = i} ^{e} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{e} M_{in}(i, l, k)
-	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) \geq N_l \mod (N_l + N_s), s \leq i, j \leq e \\
-	0 & \text{ otherwise } 
+	 	V - F(e), \quad
+	  	Q, \quad
+        G(e)
+	\right\} \cdot \alpha(i, j) &  IF_3\\
+	0 & \text{ ow } 
 	\end{cases}
 \end{equation}
+
+其中，$FI_i(i=1,2,3)$分别代表：
+
+\begin{equation*}
+    \begin{cases}
+        FI_1 = \text{if}(t-1)<N_l\mod(N_l+N_s), t = 1  \\
+        FI_2 = \text{ if } (t - 1) < N_l \mod (N_l + N_s), t > 1    \\
+        FI_3 = \text{ if } (t - 1) \geq N_l \mod (N_l + N_s), s \leq i, j \leq e \\
+    \end{cases}
+\end{equation*}
+
+$F(x)$、$G(x)$、$Q$代表：
+
+\begin{equation*}
+    \begin{cases}
+        F(x) = \sum _{k = i} ^{x} M_{cur}(i, k, t) - M_{out}(i, t)  \\
+        G(x) = \sum _{k = i} ^{30} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{30} M_{in}(i, l, k)   \\
+        Q = \frac {t_{max}} {t_{avg}} - M_{out}(i, t)   \\
+    \end{cases}
+\end{equation*}
+
 
 第一个开行的车一定不是小交，因此暂时不用考虑追踪时间。而由定义得，第一个车从起点开始行驶的时刻为：乘客上下车完成后。而由于实际的上下车的数据均已知，因此可以利用平均一人上下车时间得到该车出发的时间。而对于下一个站的出发时间，只要用当前站的时刻，加上到下一站的耗时，再加上下一站的乘客上下车时间即可。
 
@@ -179,22 +200,37 @@ M_{in}(i, j, t) =
 \begin{equation}
 M_{tm}(i, t) = 
 	\begin{cases}
-		t_{avg} \cdot \sum _{k = i} ^{30} M_{in}(i, k, t) & \text{ if } i = t = 1 \\
-		M_{tm}(i - 1, t) + t_{i - 1} + t_{avg} \cdot \left[
-			M_{out}(i, t) + \sum _{k = i} ^{30} M_{in}(i, k, t)
-		\right] & \text{ if } i > 1, t = 1\\
+		t_{avg} \cdot \sum _{k = i} ^{30} M_{in}(i, k, t) &  FI_1\\
+		H & FI_2\\
 		\max \left\{ 
-			M_{tm}(i - 1, t) + t_{i - 1} + t_{avg} \cdot \left[
-				M_{out}(i, t) + \sum _{k = i} ^{30} M_{in}(i, k, t)
-			\right], 
+			H, \quad
 			\max _{k = 1} ^{t - 1}M_{tm}(i, k) + t_{del}
-		\right\} & \text{ if }\begin{matrix}
- 			t > 1, (t - 1) < N_l \mod (N_l + N_s),  \\
-			\text{ or } s \leq i \leq e, t > 1, (t - 1) \geq N_l \mod (N_l + N_s)\\
-		\end{matrix} \\
-		0 & \text{ otherwise }
+		\right\} & FI_3\\
+		 \\
+		0 & \text{ ow }
 	\end{cases}
 \end{equation}
+
+其中，$FI_i(i=1,2,3)$分别代表：
+
+\begin{equation*}
+    \begin{cases}
+        FI_1 = \text{ if } i = t = 1   \\
+        FI_2 = \text{ if } i > 1, t = 1    \\
+        FI_3 = \text{ if }\begin{matrix}
+            t > 1, (t - 1) < N_l \mod (N_l + N_s),  \\
+            \text{ or } s \leq i \leq e, t > 1, (t - 1) \geq N_l \mod (N_l + N_s)
+            \end{matrix}
+    \end{cases}
+\end{equation*}
+
+$H$代表：
+
+\begin{equation*}
+    H = M_{tm}(i - 1, t) + t_{i - 1} + t_{avg} \cdot \left[
+			M_{out}(i, t) + \sum _{k = i} ^{30} M_{in}(i, k, t)
+		\right]
+\end{equation*}
 
 由于$M_{tm}$的意义为列车刚离开的时间，也就是列车乘客刚上下车结束后的时间，因此最长的那个是最后一个完成任务的，于是最后完成的时间即为答案。
 
@@ -203,9 +239,40 @@ t_{total} = \max _{i, t} \{M_{tm}(i, t)\}
 \end{equation}
 
 
-\subsubsection{遗传算法搜寻帕累托最优解}
+\subsubsection{遗传算法解双目标规划模型}
 
-是
+\paragraph{双目标规划模型}
+
+企业运营的成本可以分为两类，分别运营固定成本与变动成本。其中运营的固定成本为列车的采购数量，而变动成本为列车的运行总里程。于是，可以建立双目标规划模型\cite{caoJiyuchengkedengdaishijiandechengshiguidaojiaotongliecheshikebiaoyouhuamoxingyusuanfayanjiu2021}：
+
+\begin{equation}
+    \min Z = \min z_1 + \min z_2
+\end{equation}
+
+根据最短理想点法，存在评价函数：
+
+\begin{align}
+    U = (z_1, \cdots, z_m) = \sqrt{\sum_{j=1}^m(z_j-z_j^{\min})^2}  \\
+    U^{'} = (z_1, \cdots, z_m) = \sqrt{
+        \sum_{j=1}^m (
+                \frac{z_j-z_j^{\min}}{z_j^{\min}}
+            )^2
+        }   \\
+\end{align}
+
+故有：
+
+\begin{equation}
+    Z = U_{'}=(z_1,\cdots,z_m)
+\end{equation}
+
+\paragraph{遗传算法流程}
+
+根据前文的分析，下面依次给出再该问题中，遗传算法的三要素的具体值：
+
+\begin{enumerate}
+    \item 
+\end{enumerate}
 
 
 % ............ 模型的准备 ............ %
