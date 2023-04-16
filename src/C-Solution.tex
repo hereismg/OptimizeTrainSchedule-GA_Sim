@@ -74,9 +74,139 @@
 
 为了求出相关的计算方法
 
-\subsubsection{动态规划求解列车客运模型}
+\subsubsection{求出乘客的平均等待时间}
 
-\subsubsection{和声遗传算法搜寻帕累托最优解}
+在站台$i$，乘客去$j$站台的频率为：希望从$i$站台到$j$站台的乘客人数，与该站台总乘客人数之比。
+
+\begin{equation}
+\alpha(i, j) = 
+	\frac {M_f(i, j)}{\sum _{k = i} ^{30} M_f(i, k)}
+\end{equation}
+
+第$t$辆出发的列车“刚刚”到达$i$站时，车厢内正有$M_{cur}(i, j, t)$个乘客打算到$j$站。当该车站为起点站时，视为列车“刚到”起点站，也就是乘客还未上下车，因此初始人数为$0$，无论大交还是小交都是这样（大交站台$1$为起点，小交站台$s$为起点）；当该车站不是起点时，刚到该车站时车厢内的乘客可以通过：刚到上一个站台时的车厢状态、上一个站台的下车乘客与上一个站台的上车乘客反映出来。
+
+\begin{equation}
+M_{cur}(i, j, t) = 
+	\begin{cases}
+	M_{cur}(i - 1, j, k) - M_{out}(i - 1, t) + M_{in}(i - 1, j, t)  & \text{ if }\sigma \\
+	0  & \text{ otherwise }
+	\end{cases}
+\end{equation}
+
+其$￥\sigma$为条件区域：
+
+\begin{equation}
+    \sigma = 
+        \begin{matrix}
+ 		1 < i \leq 30, (t - 1) < N_l \mod (N_l + N_s),  \\
+		\text{ or } s < i \leq e, (t - 1) \geq N_l \mod (N_l + N_s)\\
+		\end{matrix} \\
+\end{equation}
+
+第$t$辆发车的列车到第$i$个站台时，无论乘客的起点在哪，在该站台下车的乘客都会下车，即下车人数为：列车刚到这一站台时，所有目标在这一站台下车的本列车乘客总数，无论是乘坐大交还是乘坐小交都是这样。特别地，由于小交的范围不会超过大交的范围，因此：小交内在不在运行范围的车站的下车乘客人数视为$0$。
+
+\begin{equation}
+M_{out}(i, t) = 
+	\begin{cases}
+	\sum _{k = 1} ^{i} M_{cur}(k, i, t)  & \text{ if } (t - 1) < N_l \mod (N_l + N_s) \\
+	\sum _{k = s} ^{i} M_{cur}(k, i, t)  & \text{ if } s \leq i \leq e, (t - 1) \geq N_l \mod (N_l + N_s) \\
+	0 & \text{ otherwise }
+	\end{cases}
+\end{equation}
+
+提示：由于假定滚动发车从大交开始，因此无论何时，第一个发车的列车一定是大交而绝对不会是小交。
+
+对于列车来说，主要有三个条件限制了上车人数：一是列车本身的容量，即列车乘客总数不能超过列车定员数。为了计算这一点，我们首先要计算出这个列车到达这一站，乘客下车后还有多少个乘客还在车上。经过计算，车上的乘客数量等于刚到该站的列车乘客状态减去所有下车的乘客，即：
+
+\begin{equation}
+C = \sum _{k = i} ^{30} M_{cur}(i, k, t) - M_{out}(i, t)
+\end{equation}
+
+那么就可以算出最多还可以容纳的乘客数量为：
+
+\begin{equation}
+    V_{\text{剩余}} = V-\left[ \sum _{k = i} ^{30} M_{cur}(i, k, t) - M_{out}(i, t) \right]
+\end{equation}
+
+在上式中，其中$V$为定员数。
+
+除了容量限制外，还有时间限制，即当超过一定时间后列车门关闭不再允许上车。除去下车用时，最多还能上车的乘客数量为：
+
+\begin{equation}
+V_{\max} = \frac {t_{max}} {t_{avg}} - M_{out}(i, t)
+\end{equation}
+
+与此同时，该站台的人数也会影响上车人数，即当该站台人数不能填满列车时，列车还应该有多余空位，而该车站却已无乘客（已经被其他的列车接走了），即最多上车乘客数量为：
+
+\begin{equation}
+V_{\max2} = \sum _{k = i} ^{30} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{e} M_{in}(i, l, k)
+\end{equation}
+
+总之，我们对以上结果取最小值，即为第$t$列开行的列车在站台$i$的实际上车总人数为上面三个表达式的最小值。
+
+接下来还需要考虑上车的乘客分别要去往哪个站台。而于上下车由不会影响该站台不同目的地乘客的比例，因此对总人数乘以对应的数量频率即可得到答案。
+
+以上算的都是针对大交的，至于小交，只需修改求和范围即可（当然，对于小交不运行的范围，对应上车乘客数视为$0$）。
+
+\begin{equation}
+M_{in}(i, j, t) = 
+	\begin{cases}
+	\min \left\{
+	 	V - \left[ \sum _{k = i} ^{30} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
+	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
+	  	\sum _{k = i} ^{30} M_f(i, k)
+	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) < N_l \mod (N_l + N_s), t = 1 \\
+	\min \left\{
+	 	V - \left[ \sum _{k = i} ^{30} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
+	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
+	  	\sum _{k = i} ^{30} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{30} M_{in}(i, l, k)
+	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) < N_l \mod (N_l + N_s), t > 1 \\
+	\min \left\{
+	 	V - \left[ \sum _{k = i} ^{e} M_{cur}(i, k, t) - M_{out}(i, t) \right], 
+	  	\frac {t_{max}} {t_{avg}} - M_{out}(i, t),
+	  	\sum _{k = i} ^{e} M_f(i, k) - \sum _{k = 1} ^{t - 1} \sum _{l = i} ^{e} M_{in}(i, l, k)
+	\right\} \cdot \alpha(i, j) & \text{ if } (t - 1) \geq N_l \mod (N_l + N_s), s \leq i, j \leq e \\
+	0 & \text{ otherwise } 
+	\end{cases}
+\end{equation}
+
+第一个开行的车一定不是小交，因此暂时不用考虑追踪时间。而由定义得，第一个车从起点开始行驶的时刻为：乘客上下车完成后。而由于实际的上下车的数据均已知，因此可以利用平均一人上下车时间得到该车出发的时间。而对于下一个站的出发时间，只要用当前站的时刻，加上到下一站的耗时，再加上下一站的乘客上下车时间即可。
+
+由于采取“先规划后行驶”的方案，规划完第一个车的时刻后再考虑下一辆车。
+
+对于下一辆车，要么是小交、要么是大交，可能会受到追踪时间干扰。但是前提是在同一区间，即假设发车前有车还没有到达下一个站台，因此必须考虑那辆车是“什么时间”出发的，即选择“同一车站中，发车时间最近的那一辆列车”判断是否超过追踪时间。当超过追踪时间后才可以发车。因此，本列车的出发时刻为：乘客上下完车后的时刻、最近的那辆车从本站出发的时刻再加上追踪时间，取最大值。
+
+\begin{equation}
+M_{tm}(i, t) = 
+	\begin{cases}
+		t_{avg} \cdot \sum _{k = i} ^{30} M_{in}(i, k, t) & \text{ if } i = t = 1 \\
+		M_{tm}(i - 1, t) + t_{i - 1} + t_{avg} \cdot \left[
+			M_{out}(i, t) + \sum _{k = i} ^{30} M_{in}(i, k, t)
+		\right] & \text{ if } i > 1, t = 1\\
+		\max \left\{ 
+			M_{tm}(i - 1, t) + t_{i - 1} + t_{avg} \cdot \left[
+				M_{out}(i, t) + \sum _{k = i} ^{30} M_{in}(i, k, t)
+			\right], 
+			\max _{k = 1} ^{t - 1}M_{tm}(i, k) + t_{del}
+		\right\} & \text{ if }\begin{matrix}
+ 			t > 1, (t - 1) < N_l \mod (N_l + N_s),  \\
+			\text{ or } s \leq i \leq e, t > 1, (t - 1) \geq N_l \mod (N_l + N_s)\\
+		\end{matrix} \\
+		0 & \text{ otherwise }
+	\end{cases}
+\end{equation}
+
+由于$M_{tm}$的意义为列车刚离开的时间，也就是列车乘客刚上下车结束后的时间，因此最长的那个是最后一个完成任务的，于是最后完成的时间即为答案。
+
+\begin{equation}
+t_{total} = \max _{i, t} \{M_{tm}(i, t)\}
+\end{equation}
+
+
+\subsubsection{遗传算法搜寻帕累托最优解}
+
+是
+
 
 % ............ 模型的准备 ............ %
 
