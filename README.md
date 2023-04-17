@@ -6,7 +6,7 @@
 
 ## $\LaTeX$工程结构
 
-<img src="res/LaTeX%E5%B7%A5%E7%A8%8B%E7%BB%93%E6%9E%84.svg" width="600" alt="LaTeX工程结构" align=center />
+<img src="res/LaTeX%E5%B7%A5%E7%A8%8B%E7%BB%93%E6%9E%84.svg" width="700" alt="LaTeX工程结构" align=center />
 
 # 撰稿人
 
