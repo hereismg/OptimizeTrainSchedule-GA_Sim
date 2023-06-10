@@ -1,8 +1,12 @@
 # 项目简介
 
-该项目一篇名为《通过遗传算法和仿真模拟优化列车时刻表问题》（*Optimize train schedule problems through genetic algorithms and simulations*，简称OTSP-GASL）的论文，该是2023年第十三届[MathorCup](https://www.saikr.com/vse/mathorcup/2023)高校数学建模挑战赛的参赛作品，选题为B题。
+该项目是2023年第十三届[MathorCup](https://www.saikr.com/vse/mathorcup/2023)高校数学建模挑战赛的**B题**参赛论文的工程文件，论文名为《通过遗传算法和仿真模拟优化列车时刻表问题》（*Optimize train schedule problems through genetic algorithms and simulations*，简称PTS-GA-Sim），该论文尝试用遗传算法和仿真模拟解决列车时刻优化问题。
 
-在本次论文的撰写过程中，论文撰写的环境配置方案为：`Visual Studio Code` + $\LaTeX$ + `git`. 其中 `Visual Studio Code` 作为编译器，LaTeX是文字排版引擎，`git`用于项目管理和多人协同。
+## 环境配置方案
+
+- 编辑器：`Visual Studio Code`
+- 文字排版引擎：$\LaTeX$
+- 项目管理与多人协同：`git` + `github`
 
 ## $\LaTeX$工程结构
 
@@ -10,9 +14,9 @@
 
 # 撰稿人
 
-@ hereismg
-@ WxyDZDgn
-@ Dikkoo
+@hereismg
+@WxyDZDgn
+@Dikkoo
 
 # 免责声明
 
